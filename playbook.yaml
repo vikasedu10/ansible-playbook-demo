@@ -1,8 +1,6 @@
 ---
   - name: install nodejs & npm
     hosts: webservers
-    become: yes
-    become_user: vikas
     tasks:
       - name: update apt repo & cache
         apt: 
