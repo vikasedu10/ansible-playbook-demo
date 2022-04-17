@@ -14,3 +14,24 @@
           pkg:
             - nodejs
             - npm
+
+  - name: deploy node js app
+    hosts: webservers
+    tasks:
+      - name: unpack node js tar file from local to remote
+        ansible.builtin.unarchive:
+          src: /mnt/c/Users/vikas/OneDrive/Desktop/P/Node/hello-world-1/hello-world-1-1.0.0.tgz
+          dest: /home/vikas/
+      - name: install dependencies
+        npm:
+          path: /home/vikas/package
+      - name: run the node app 
+        command:
+          chdir: /home/vikas/package/app
+          cmd: node server
+        async: 1000
+        poll: 0
+      - name: ensure the app is running
+        shell: ps aux | grep node
+        register: node_app_status
+      - debug: msg={{node_app_status.stdout_lines}}
