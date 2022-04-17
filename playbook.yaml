@@ -1,5 +1,6 @@
 ---
   - name: install nodejs & npm
+    become: yes
     hosts: webservers
     tasks:
       - name: update apt repo & cache
@@ -13,19 +14,30 @@
             - nodejs
             - npm
 
+  - name: Create a new user for node app
+    become: yes
+    hosts: webservers
+    tasks:
+      - name: Create linux user
+        user: 
+          name: pandey
+          comment: pandey admin
+          group: admin
+
   - name: deploy node js app
     hosts: webservers
+    become: True
     tasks:
       - name: unpack node js tar file from local to remote
         ansible.builtin.unarchive:
           src: /mnt/c/Users/vikas/OneDrive/Desktop/P/Node/hello-world-1/hello-world-1-1.0.0.tgz
-          dest: /home/vikas/
+          dest: /home/pandey/
       - name: install dependencies
         npm:
-          path: /home/vikas/package
+          path: /home/pandey/package
       - name: run the node app 
         command:
-          chdir: /home/vikas/package/app
+          chdir: /home/pandey/package/app
           cmd: node server
         async: 1000
         poll: 0
