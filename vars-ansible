@@ -1,0 +1,4 @@
+get_user: pandey
+version: 1.0.0
+location: /mnt/c/Users/vikas/OneDrive/Desktop/P/Node/hello-world-1
+host_destination: /home/{{get_user}}/
