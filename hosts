@@ -1,6 +1,14 @@
 [webservers]
 52.14.255.118
+18.222.137.90
 
 [webservers:vars]
 ansible_ssh_private_key_file=/home/vikas/.ssh/id_rsa
-ansible_user=vikas
+ansible_user=root
+
+[docker_host]
+18.222.137.90
+
+[docker_host:vars]
+ansible_ssh_private_key_file=/home/vikas/.ssh/id_rsa
+ansible_user=root
