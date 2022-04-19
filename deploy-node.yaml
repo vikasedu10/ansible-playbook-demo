@@ -1,0 +1,52 @@
+---
+  - name: install nodejs & npm
+    become: yes
+    hosts: webservers
+    tasks:
+      - name: update apt repo & cache
+        apt: 
+          update_cache: yes
+          force_apt_get: yes
+          cache_valid_time: 3600
+      - name: Install nodejs & npm
+        apt:
+          pkg:
+            - nodejs
+            - npm
+
+  - name: Create a new user for node app
+    become: yes
+    hosts: webservers
+    vars_files:
+      - vars-ansible
+    tasks:
+      - name: Create linux user
+        user: 
+          name: "{{get_user}}"
+          comment: "{{get_user}} admin"
+          group: admin
+
+  - name: deploy node js app
+    hosts: webservers
+    become: True
+    vars_files:
+      - vars-ansible
+
+    tasks:
+      - name: unpack node js tar file from local to remote
+        ansible.builtin.unarchive:
+          src: "{{location}}/hello-world-1-{{version}}.tgz"
+          dest: "{{host_destination}}"
+      - name: install dependencies
+        npm:
+          path: "{{host_destination}}package"
+      - name: run the node app 
+        command:
+          chdir: "{{host_destination}}package/app"
+          cmd: node server
+        async: 1000
+        poll: 0
+      - name: ensure the app is running
+        shell: ps aux | grep node
+        register: node_app_status
+      - debug: msg={{node_app_status.stdout_lines}}
