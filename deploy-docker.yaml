@@ -1,0 +1,63 @@
+---
+- name: Install python3 & docker related dependencies
+  hosts: docker_host
+  tasks:
+  - name: Install Python3
+    apt:
+      name: python3
+      state: present
+    with_items:
+      - python-pip
+      - python3-pip
+  - name: Install dependencies
+    apt: 
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+      cache_valid_time: 3600
+    loop: 
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      - python3-setuptools
+
+- name: Install Docker, docker-compose
+  hosts: docker_host
+  vars_files:
+      - vars/default.yaml
+  tasks:
+  - name: Add GPG Key
+    apt_key: 
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+  - name: Add Docker repository to apt
+    apt_repository: 
+      repo: deb https://download.docker.com/linux/ubuntu bionic stable
+      state: present
+  - name: Install Docker
+    apt: 
+      name: "{{item}}"
+      state: latest
+      update_cache: yes
+    loop:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+  - name: Install docker-compose
+    get_url:
+      url: "{{docker_compose_url}}" 
+      dest: /usr/local/bin/docker-compose
+      mode: u+x,g+x,o+x
+
+- name: Verify Docker is running
+  hosts: docker_host
+  tasks:
+  - name: Verify Docker daemon is started & enabled
+    service:
+      name: docker
+      state: started
+      enabled: yes
+      register: v_docker_state
+  - debug: msg={{v_docker_state}}
